@@ -1,67 +1,115 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:background="#1a1a2e">
 
-    <!-- 频道列表 -->
-    <FrameLayout
+    <!-- 频道列表（左侧） -->
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/channelList"
+        <!-- 源切换按钮 -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp"
-            android:clipToPadding="false" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="6dp"
+            android:background="#16213e">
+
+            <Button
+                android:id="@+id/btnSourceVip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="VIP"
+                android:textSize="11sp"
+                android:layout_marginRight="2dp"
+                android:onClick="switchSource" />
+
+            <Button
+                android:id="@+id/btnSourceBaohes"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="宝盒"
+                android:textSize="11sp"
+                android:layout_marginRight="2dp"
+                android:onClick="switchSource" />
+
+            <Button
+                android:id="@+id/btnSourceAi"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="AI"
+                android:textSize="11sp"
+                android:layout_marginRight="2dp"
+                android:onClick="switchSource" />
+
+            <Button
+                android:id="@+id/btnScanQr"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="扫码"
+                android:textSize="11sp"
+                android:onClick="scanQRCode" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/loading"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_gravity="center"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/noSourceView"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="暂无频道"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="暂无频道\n下拉刷新"
             android:textColor="#888"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:visibility="gone" />
 
+        <!-- 频道列表 -->
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <FrameLayout
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/channelList"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/channelList2"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </FrameLayout>
+                android:layout_height="match_parent"
+                android:padding="4dp"
+                android:clipToPadding="false" />
+
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    </FrameLayout>
+    </LinearLayout>
 
-    <!-- 播放器 -->
+    <!-- 播放器（右侧） -->
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1.5"
+        android:layout_weight="1.8"
         android:background="#000">
 
-        <FrameLayout
-            android:id="@+id/playerContainer"
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/playerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            app:show_buffering="when_playing"
+            app:use_controller="true" />
 
         <TextView
             android:id="@+id/nowPlaying"
