@@ -26,7 +26,6 @@ TVPlayerAndroid/
 
 ## 内置直播源
 
-- VIP直播: https://8879.kstore.space/zhibo.txt
 - 宝盒直播: http://ygbh.cc.cd/bhzb.php
 - AI更新: https://hub.glowp.xyz/...
 
