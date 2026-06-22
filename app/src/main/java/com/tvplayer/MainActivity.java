@@ -1,4 +1,4 @@
-﻿package com.tvplayer;
+package com.tvplayer;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,14 +27,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.journeyapps.barcodescanner.CaptureActivity;
-import com.tvplayer.okhttp3.Call;
-import com.tvplayer.okhttp3.Callback;
-import com.tvplayer.okhttp3.OkHttpClient;
-import com.tvplayer.okhttp3.Request;
-import com.tvplayer.okhttp3.Response;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,6 +34,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 @UnstableApi
 public class MainActivity extends AppCompatActivity {
@@ -161,9 +158,6 @@ public class MainActivity extends AppCompatActivity {
         Button btnVip = findViewById(R.id.btnSourceVip);
         Button btnBh = findViewById(R.id.btnSourceBaohes);
         Button btnAi = findViewById(R.id.btnSourceAi);
-        btnVip.setSelected("vip".equals(currentSourceKey));
-        btnBh.setSelected("baohes".equals(currentSourceKey));
-        btnAi.setSelected("ai".equals(currentSourceKey));
         btnVip.setAlpha("vip".equals(currentSourceKey) ? 1.0f : 0.5f);
         btnBh.setAlpha("baohes".equals(currentSourceKey) ? 1.0f : 0.5f);
         btnAi.setAlpha("ai".equals(currentSourceKey) ? 1.0f : 0.5f);
@@ -188,7 +182,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        com.google.zxing.integration.android.IntentResult result =
+            IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null && result.getContents() != null) {
             String url = result.getContents().trim();
             if (url.startsWith("http")) {
