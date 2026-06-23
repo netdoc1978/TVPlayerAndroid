@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA = 100;
     private String currentSourceKey = "vip";
 
-    private int menuLevel = 0; // 0=hidden, 1=source, 2=category, 3=channel
+    private int menuLevel = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
         categoryList = findViewById(R.id.categoryList);
         channelList = findViewById(R.id.channelList);
 
-        // Tap to show menu
         rootLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -251,7 +250,6 @@ public class MainActivity extends AppCompatActivity {
         if (ch.urls.size() == 1) {
             playUrl(ch.urls.get(0), ch.name);
         } else {
-            // Play first source, show source selection
             playUrl(ch.urls.get(0), ch.name + " (Source 1)");
         }
     }
@@ -281,7 +279,6 @@ public class MainActivity extends AppCompatActivity {
                     if (line.isEmpty()) continue;
                     if (line.startsWith("//")) continue;
 
-                    // Format: "频道名,#genre#"
                     if (line.contains(",#genre#")) {
                         int idx = line.indexOf(",#genre#");
                         String genrePart = line.substring(0, idx).trim();
@@ -295,7 +292,6 @@ public class MainActivity extends AppCompatActivity {
                         continue;
                     }
 
-                    // Format: "频道名,http://..."
                     int commaIdx = line.indexOf(',');
                     if (commaIdx <= 0) continue;
                     String name = line.substring(0, commaIdx).trim();
@@ -345,7 +341,6 @@ public class MainActivity extends AppCompatActivity {
                             categoryAdapter.update(new ArrayList<String>(categoryNames));
                             channelAdapter.update(new ArrayList<ChannelItem>());
 
-                            // Auto select first category
                             selectedCatIndex = 0;
                             categoryAdapter.setSelected(0);
                             loadChannelsForCategory(categoryNames.get(0));
@@ -581,5 +576,11 @@ public class MainActivity extends AppCompatActivity {
         String name;
         List<String> urls = new ArrayList<String>();
         ChannelItem(String n) { name = n; }
+    }
+
+    static class SourceItem {
+        String label;
+        String url;
+        SourceItem(String l, String u) { label = l; url = u; }
     }
 }
