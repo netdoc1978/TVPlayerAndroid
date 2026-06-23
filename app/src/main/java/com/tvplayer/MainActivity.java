@@ -67,11 +67,11 @@ public class MainActivity extends AppCompatActivity {
     private int selectedCatIndex = -1;
     private int selectedChIndex = -1;
 
-    private static final String SOURCE_VIP = ""https://8879.kstore.space/zhibo.txt"";
-    private static final String SOURCE_BAOHES = ""http://ygbh.cc.cd/bhzb.php"";
-    private static final String SOURCE_AI = ""https://hub.glowp.xyz/https://raw.githubusercontent.com/jn950/live/main/tv/pllive.txt"";
+    private static final String SOURCE_VIP = "https://8879.kstore.space/zhibo.txt";
+    private static final String SOURCE_BAOHES = "http://ygbh.cc.cd/bhzb.php";
+    private static final String SOURCE_AI = "https://hub.glowp.xyz/https://raw.githubusercontent.com/jn950/live/main/tv/pllive.txt";
     private static final int REQUEST_CAMERA = 100;
-    private String currentSourceKey = ""vip"";
+    private String currentSourceKey = "vip";
     private String currentSourceUrl = SOURCE_VIP;
 
     @Override
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(MainActivity.this, ""Play error"", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Play error", Toast.LENGTH_SHORT).show();
                         loading.setVisibility(View.GONE);
                     }
                 });
@@ -186,12 +186,12 @@ public class MainActivity extends AppCompatActivity {
         if (channels == null || channels.isEmpty()) {
             channelAdapter.update(new ArrayList<ChannelItem>());
             sourceAdapter.update(new ArrayList<SourceItem>());
-            tvSourceTitle.setText(""No channels"");
+            tvSourceTitle.setText("No channels");
             return;
         }
         channelAdapter.update(channels);
         sourceAdapter.update(new ArrayList<SourceItem>());
-        tvSourceTitle.setText(""Select channel"");
+        tvSourceTitle.setText("Select channel");
         selectedChIndex = 0;
         channelAdapter.setSelected(0);
         loadSourcesForChannel(channels.get(0));
@@ -201,18 +201,18 @@ public class MainActivity extends AppCompatActivity {
         if (ch.urls.size() == 1) {
             playUrl(ch.urls.get(0), ch.name);
             List<SourceItem> sources = new ArrayList<SourceItem>();
-            sources.add(new SourceItem(ch.name + "" (1 source)"", ch.urls.get(0)));
+            sources.add(new SourceItem(ch.name + " (1 source)", ch.urls.get(0)));
             sourceAdapter.update(sources);
-            tvSourceTitle.setText(ch.name + "" (1 source)"");
+            tvSourceTitle.setText(ch.name + " (1 source)");
         } else {
             List<SourceItem> sources = new ArrayList<SourceItem>();
             for (int i = 0; i < ch.urls.size(); i++) {
-                String label = ""Source"" + (i + 1) + "" - "" + ch.name;
+                String label = "Source" + (i + 1) + " - " + ch.name;
                 sources.add(new SourceItem(label, ch.urls.get(i)));
             }
             sourceAdapter.update(sources);
-            tvSourceTitle.setText(ch.name + "" ("" + ch.urls.size() + "" sources, auto 1)"");
-            playUrl(ch.urls.get(0), ""Source1 - "" + ch.name);
+            tvSourceTitle.setText(ch.name + " (" + ch.urls.size() + " sources, auto 1)");
+            playUrl(ch.urls.get(0), "Source1 - " + ch.name);
         }
     }
 
@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
         if (player == null) return;
         tvNoSource.setVisibility(View.GONE);
         loading.setVisibility(View.VISIBLE);
-        tvSourceTitle.setText("">> "" + name);
+        tvSourceTitle.setText(">> " + name);
         MediaItem mediaItem = MediaItem.fromUri(url);
         player.setMediaItem(mediaItem);
         player.prepare();
@@ -232,18 +232,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 LinkedHashMap<String, List<ChannelItem>> result = new LinkedHashMap<String, List<ChannelItem>>();
-                String currentCat = ""Default"";
+                String currentCat = "Default";
                 List<ChannelItem> currentList = new ArrayList<ChannelItem>();
 
-                String[] lines = text.split(""\r?\n"");
+                String[] lines = text.split("\r?\n");
                 for (String raw : lines) {
                     String line = raw.trim();
                     if (line.isEmpty()) continue;
-                    if (line.startsWith(""//"")) continue;
+                    if (line.startsWith("//")) continue;
 
-                    // Format: ""分类名,#genre#""
-                    if (line.contains("",#genre#"")) {
-                        int idx = line.indexOf("",#genre#"");
+                    // Format: "频道名,#genre#"
+                    if (line.contains(",#genre#")) {
+                        int idx = line.indexOf(",#genre#");
                         String genrePart = line.substring(0, idx).trim();
                         if (!genrePart.isEmpty()) {
                             if (!currentList.isEmpty()) {
@@ -255,12 +255,12 @@ public class MainActivity extends AppCompatActivity {
                         continue;
                     }
 
-                    // Format: ""频道名,http://...""
+                    // Format: "频道名,http://..."
                     int commaIdx = line.indexOf(',');
                     if (commaIdx <= 0) continue;
                     String name = line.substring(0, commaIdx).trim();
                     String url = line.substring(commaIdx + 1).trim();
-                    if (!url.startsWith(""http"")) continue;
+                    if (!url.startsWith("http")) continue;
                     if (name.isEmpty()) continue;
 
                     ChannelItem existing = null;
@@ -297,19 +297,19 @@ public class MainActivity extends AppCompatActivity {
 
                         if (categoryNames.isEmpty()) {
                             tvNoSource.setVisibility(View.VISIBLE);
-                            tvNoSource.setText(""No channels"");
+                            tvNoSource.setText("No channels");
                             categoryAdapter.update(new ArrayList<String>());
                             channelAdapter.update(new ArrayList<ChannelItem>());
                             sourceAdapter.update(new ArrayList<SourceItem>());
-                            tvCategoryTitle.setText(""Category"");
-                            tvSourceTitle.setText(""Select channel"");
+                            tvCategoryTitle.setText("Category");
+                            tvSourceTitle.setText("Select channel");
                         } else {
                             tvNoSource.setVisibility(View.GONE);
                             categoryAdapter.update(new ArrayList<String>(categoryNames));
                             channelAdapter.update(new ArrayList<ChannelItem>());
                             sourceAdapter.update(new ArrayList<SourceItem>());
                             tvCategoryTitle.setText(categoryNames.get(0));
-                            tvSourceTitle.setText(""Select channel"");
+                            tvSourceTitle.setText("Select channel");
 
                             selectedCatIndex = 0;
                             categoryAdapter.setSelected(0);
@@ -323,9 +323,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadSource(String key) {
         Map<String, String> sources = new HashMap<String, String>();
-        sources.put(""vip"", SOURCE_VIP);
-        sources.put(""baohes"", SOURCE_BAOHES);
-        sources.put(""ai"", SOURCE_AI);
+        sources.put("vip", SOURCE_VIP);
+        sources.put("baohes", SOURCE_BAOHES);
+        sources.put("ai", SOURCE_AI);
 
         String url = sources.get(key);
         if (url == null) return;
@@ -333,19 +333,19 @@ public class MainActivity extends AppCompatActivity {
         currentSourceUrl = url;
         loading.setVisibility(View.VISIBLE);
         tvNoSource.setVisibility(View.GONE);
-        tvNoSource.setText(""Loading..."");
+        tvNoSource.setText("Loading...");
 
         selectedCatIndex = -1;
         selectedChIndex = -1;
         categoryAdapter.update(new ArrayList<String>());
         channelAdapter.update(new ArrayList<ChannelItem>());
         sourceAdapter.update(new ArrayList<SourceItem>());
-        tvCategoryTitle.setText(""Category"");
-        tvSourceTitle.setText(""Select channel"");
+        tvCategoryTitle.setText("Category");
+        tvSourceTitle.setText("Select channel");
 
         Request request = new Request.Builder()
             .url(url)
-            .header(""User-Agent"", ""Mozilla/5.0 (Android; Mobile)"")
+            .header("User-Agent", "Mozilla/5.0 (Android; Mobile)")
             .build();
 
         httpClient.newCall(request).enqueue(new Callback() {
@@ -356,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         loading.setVisibility(View.GONE);
                         tvNoSource.setVisibility(View.VISIBLE);
-                        tvNoSource.setText(""Load failed: "" + e.getMessage());
+                        tvNoSource.setText("Load failed: " + e.getMessage());
                     }
                 });
             }
@@ -364,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    String body = response.body() != null ? response.body().string() : """";
+                    String body = response.body() != null ? response.body().string() : "";
                     parseChannels(body);
                 } else {
                     final int code = response.code();
@@ -373,7 +373,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             loading.setVisibility(View.GONE);
                             tvNoSource.setVisibility(View.VISIBLE);
-                            tvNoSource.setText(""HTTP error: "" + code);
+                            tvNoSource.setText("HTTP error: " + code);
                         }
                     });
                 }
@@ -384,9 +384,9 @@ public class MainActivity extends AppCompatActivity {
     public void switchSource(View v) {
         String key = null;
         int id = v.getId();
-        if (id == R.id.btnSourceVip) key = ""vip"";
-        else if (id == R.id.btnSourceBaohes) key = ""baohes"";
-        else if (id == R.id.btnSourceAi) key = ""ai"";
+        if (id == R.id.btnSourceVip) key = "vip";
+        else if (id == R.id.btnSourceBaohes) key = "baohes";
+        else if (id == R.id.btnSourceAi) key = "ai";
         if (key != null && !key.equals(currentSourceKey)) {
             currentSourceKey = key;
             updateSourceButtons();
@@ -398,9 +398,9 @@ public class MainActivity extends AppCompatActivity {
         Button btnVip = findViewById(R.id.btnSourceVip);
         Button btnBh = findViewById(R.id.btnSourceBaohes);
         Button btnAi = findViewById(R.id.btnSourceAi);
-        btnVip.setAlpha(""vip"".equals(currentSourceKey) ? 1.0f : 0.5f);
-        btnBh.setAlpha(""baohes"".equals(currentSourceKey) ? 1.0f : 0.5f);
-        btnAi.setAlpha(""ai"".equals(currentSourceKey) ? 1.0f : 0.5f);
+        btnVip.setAlpha("vip".equals(currentSourceKey) ? 1.0f : 0.5f);
+        btnBh.setAlpha("baohes".equals(currentSourceKey) ? 1.0f : 0.5f);
+        btnAi.setAlpha("ai".equals(currentSourceKey) ? 1.0f : 0.5f);
     }
 
     public void refreshSource(View v) {
@@ -430,13 +430,13 @@ public class MainActivity extends AppCompatActivity {
             IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null && result.getContents() != null) {
             String url = result.getContents().trim();
-            if (url.startsWith(""http"")) {
-                currentSourceKey = ""custom"";
+            if (url.startsWith("http")) {
+                currentSourceKey = "custom";
                 currentSourceUrl = url;
                 updateSourceButtons();
                 loadCustomSource(url);
             } else {
-                Toast.makeText(this, ""Invalid QR"", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Invalid QR", Toast.LENGTH_SHORT).show();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -445,19 +445,19 @@ public class MainActivity extends AppCompatActivity {
     private void loadCustomSource(String url) {
         loading.setVisibility(View.VISIBLE);
         tvNoSource.setVisibility(View.GONE);
-        tvNoSource.setText(""Loading..."");
+        tvNoSource.setText("Loading...");
 
         selectedCatIndex = -1;
         selectedChIndex = -1;
         categoryAdapter.update(new ArrayList<String>());
         channelAdapter.update(new ArrayList<ChannelItem>());
         sourceAdapter.update(new ArrayList<SourceItem>());
-        tvCategoryTitle.setText(""Category"");
-        tvSourceTitle.setText(""Select channel"");
+        tvCategoryTitle.setText("Category");
+        tvSourceTitle.setText("Select channel");
 
         Request request = new Request.Builder()
             .url(url)
-            .header(""User-Agent"", ""Mozilla/5.0 (Android; Mobile)"")
+            .header("User-Agent", "Mozilla/5.0 (Android; Mobile)")
             .build();
 
         httpClient.newCall(request).enqueue(new Callback() {
@@ -468,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         loading.setVisibility(View.GONE);
                         tvNoSource.setVisibility(View.VISIBLE);
-                        tvNoSource.setText(""Load failed: "" + e.getMessage());
+                        tvNoSource.setText("Load failed: " + e.getMessage());
                     }
                 });
             }
@@ -476,7 +476,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    String body = response.body() != null ? response.body().string() : """";
+                    String body = response.body() != null ? response.body().string() : "";
                     parseChannels(body);
                 } else {
                     final int code = response.code();
@@ -485,7 +485,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             loading.setVisibility(View.GONE);
                             tvNoSource.setVisibility(View.VISIBLE);
-                            tvNoSource.setText(""HTTP error: "" + code);
+                            tvNoSource.setText("HTTP error: " + code);
                         }
                     });
                 }
@@ -501,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 scanQRCode(null);
             } else {
-                Toast.makeText(this, ""Camera permission required"", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show();
             }
         }
     }
