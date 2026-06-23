@@ -8,6 +8,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +28,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.journeyapps.barcodescanner.CaptureActivity;
 
-import android.widget.Toast;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -63,14 +63,13 @@ public class MainActivity extends AppCompatActivity {
     private OkHttpClient httpClient;
     private android.os.Handler mainHandler;
 
-    // 涓夌骇鏁版嵁
+    // 娑撳楠囬弫鐗堝祦
     private LinkedHashMap<String, List<ChannelItem>> categoryMap = new LinkedHashMap<>();
     private List<String> categoryNames = new ArrayList<>();
     private int selectedCatIndex = -1;
     private int selectedChIndex = -1;
 
-    // 褰撳墠鎾斁淇℃伅
-    private String playingName = "";
+    // 瑜版挸澧犻幘顓熸杹娣団剝浼?    private String playingName = "";
 
     private static final String SOURCE_VIP = "https://8879.kstore.space/zhibo.txt";
     private static final String SOURCE_BAOHES = "http://ygbh.cc.cd/bhzb.php";
@@ -110,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         channelList = findViewById(R.id.channelList);
         sourceList = findViewById(R.id.sourceList);
 
-        // 涓€绾х洰褰?        categoryAdapter = new CategoryAdapter(new ArrayList<>(), position -> {
+        // 娑撯偓缁狙呮窗瑜?        categoryAdapter = new CategoryAdapter(new ArrayList<>(), position -> {
             selectedCatIndex = position;
             selectedChIndex = -1;
             categoryAdapter.setSelected(position);
@@ -121,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         categoryList.setLayoutManager(new LinearLayoutManager(this));
         categoryList.setAdapter(categoryAdapter);
 
-        // 浜岀骇鐩綍
+        // 娴滃瞼楠囬惄顔肩秿
         channelAdapter = new ChannelAdapter(new ArrayList<>(), position -> {
             selectedChIndex = position;
             channelAdapter.setSelected(position);
@@ -135,8 +134,7 @@ public class MainActivity extends AppCompatActivity {
         channelList.setLayoutManager(new LinearLayoutManager(this));
         channelList.setAdapter(channelAdapter);
 
-        // 涓夌骇鐩綍锛堟í鍚戯級
-        sourceAdapter = new SourceAdapter(new ArrayList<>(), position -> {
+        // 娑撳楠囬惄顔肩秿閿涘牊铆閸氭埊绱?        sourceAdapter = new SourceAdapter(new ArrayList<>(), position -> {
             SourceItem src = sourceAdapter.getItem(position);
             if (src != null) playUrl(src.url, src.label);
         });
@@ -164,75 +162,75 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
                 runOnUiThread(() -> {
-                    Toast.makeText(MainActivity.this, "鎾斁閿欒", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "閹绢厽鏂侀柨娆掝嚖", Toast.LENGTH_SHORT).show();
                     loading.setVisibility(View.GONE);
                 });
             }
         });
     }
 
-    // ==================== 鍔犺浇棰戦亾鍒楄〃 ====================
+    // ==================== 閸旂姾娴囨０鎴︿壕閸掓銆?====================
     private void loadChannelsForCategory(String catName) {
         List<ChannelItem> channels = categoryMap.get(catName);
         if (channels == null || channels.isEmpty()) {
             channelAdapter.update(new ArrayList<>());
             sourceAdapter.update(new ArrayList<>());
-            tvSourceTitle.setText("璇ュ垎绫绘殏鏃犻閬?);
+            tvSourceTitle.setText("鐠囥儱鍨庣猾缁樻畯閺冪娀顣堕柆?);
             return;
         }
         channelAdapter.update(channels);
         sourceAdapter.update(new ArrayList<>());
-        tvSourceTitle.setText("璇烽€夋嫨棰戦亾");
+        tvSourceTitle.setText("鐠囩兘鈧瀚ㄦ０鎴︿壕");
 
-        // 榛樿閫変腑绗竴涓閬?        selectedChIndex = 0;
+        // 姒涙顓婚柅澶夎厬缁楊兛绔存稉顏堫暥闁?        selectedChIndex = 0;
         channelAdapter.setSelected(0);
         loadSourcesForChannel(channels.get(0));
     }
 
-    // ==================== 鍔犺浇婧愬垪琛ㄥ苟鑷姩鎾斁 ====================
+    // ==================== 閸旂姾娴囧┃鎰灙鐞涖劌鑻熼懛顏勫З閹绢厽鏂?====================
     private void loadSourcesForChannel(ChannelItem ch) {
         if (ch.urls.size() == 1) {
             playUrl(ch.urls.get(0), ch.name);
             List<SourceItem> sources = new ArrayList<>();
-            sources.add(new SourceItem(ch.name + " (鍞竴)", ch.urls.get(0)));
+            sources.add(new SourceItem(ch.name + " (閸烆垯绔?", ch.urls.get(0)));
             sourceAdapter.update(sources);
-            tvSourceTitle.setText(ch.name + " (1涓簮)");
+            tvSourceTitle.setText(ch.name + " (1娑擃亝绨?");
         } else {
             List<SourceItem> sources = new ArrayList<>();
             for (int i = 0; i < ch.urls.size(); i++) {
-                String label = "婧? + (i + 1) + " " + ch.name;
+                String label = "濠? + (i + 1) + " " + ch.name;
                 sources.add(new SourceItem(label, ch.urls.get(i)));
             }
             sourceAdapter.update(sources);
-            tvSourceTitle.setText(ch.name + " (" + ch.urls.size() + "涓簮锛岄€?鎾斁)");
-            // 鑷姩鎾斁绗竴涓?            playUrl(ch.urls.get(0), "婧? " + ch.name);
+            tvSourceTitle.setText(ch.name + " (" + ch.urls.size() + "娑擃亝绨敍宀勨偓?閹绢厽鏂?");
+            // 閼奉亜濮╅幘顓熸杹缁楊兛绔存稉?            playUrl(ch.urls.get(0), "濠? " + ch.name);
         }
     }
 
-    // ==================== 鎾斁 ====================
+    // ==================== 閹绢厽鏂?====================
     private void playUrl(String url, String name) {
         if (player == null) return;
         playingName = name;
         tvNoSource.setVisibility(View.GONE);
         loading.setVisibility(View.VISIBLE);
-        tvSourceTitle.setText("鈻?" + name);
+        tvSourceTitle.setText("閳?" + name);
         MediaItem mediaItem = MediaItem.fromUri(url);
         player.setMediaItem(mediaItem);
         player.prepare();
         player.play();
     }
 
-    // ==================== 瑙ｆ瀽鐩存挱婧?====================
-    // 鏍煎紡: 棰戦亾鍚?#genre#  (琛ㄧず鍒嗙被鍚?
-    //       CCTV1,http://xxx.m3u8  (棰戦亾琛?
-    // #genre#琛屾湰韬槸鍒嗙被鏍囪锛岃琛屽墠闈㈢殑鏂囧瓧鏄垎绫诲悕
+    // ==================== 鐟欙絾鐎介惄瀛樻尡濠?====================
+    // 閺嶇厧绱? 妫版垿浜鹃崥?#genre#  (鐞涖劎銇氶崚鍡欒閸?
+    //       CCTV1,http://xxx.m3u8  (妫版垿浜剧悰?
+    // #genre#鐞涘本婀伴煬顐ｆЦ閸掑棛琚弽鍥唶閿涘矁顕氱悰灞藉闂堛垻娈戦弬鍥х摟閺勵垰鍨庣猾璇叉倳
     private void parseChannels(String text) {
         new Thread(() -> {
             LinkedHashMap<String, List<ChannelItem>> result = new LinkedHashMap<>();
-            String currentCat = "鏈垎绫?;
+            String currentCat = "閺堫亜鍨庣猾?;
             List<ChannelItem> currentList = new ArrayList<>();
 
-            // 鏀寔澶氱鍒嗛殧绗?            String[] separators = {"\r\n", "\r", "\n"};
+            // 閺€顖涘瘮婢舵氨顫掗崚鍡涙缁?            String[] separators = {"\r\n", "\r", "\n"};
             String[] lines = text.split(separators[0]);
             for (int k = 1; k < separators.length && lines.length <= 1; k++) {
                 lines = text.split(separators[k]);
@@ -241,12 +239,12 @@ public class MainActivity extends AppCompatActivity {
             for (String raw : lines) {
                 String line = raw.trim();
                 if (line.isEmpty()) continue;
-                if (line.startsWith("//")) continue; // 娉ㄩ噴琛岃烦杩?
-                // #genre# 琛?= 鍒嗙被鏍囪琛?                // 鏍煎紡: "澶棰戦亾,#genre#" 鎴?"澶棰戦亾 , #genre#" 鎴栧彧鏈?"#genre#"
+                if (line.startsWith("//")) continue; // 濞夈劑鍣寸悰宀冪儲鏉?
+                // #genre# 鐞?= 閸掑棛琚弽鍥唶鐞?                // 閺嶇厧绱? "婢额喛顫嬫０鎴︿壕,#genre#" 閹?"婢额喛顫嬫０鎴︿壕 , #genre#" 閹存牕褰ч張?"#genre#"
                 if (line.contains("#genre#")) {
-                    // 鎻愬彇鍒嗙被鍚嶏紙鍘绘帀 #genre# 閮ㄥ垎锛?                    String genrePart = line.substring(0, line.indexOf("#genre#")).trim();
+                    // 閹绘劕褰囬崚鍡欒閸氬稄绱欓崢缁樺竴 #genre# 闁劌鍨庨敍?                    String genrePart = line.substring(0, line.indexOf("#genre#")).trim();
                     if (!genrePart.isEmpty()) {
-                        // 淇濆瓨涓婁竴涓垎绫?                        if (!currentList.isEmpty()) {
+                        // 娣囨繂鐡ㄦ稉濠佺娑擃亜鍨庣猾?                        if (!currentList.isEmpty()) {
                             result.put(currentCat, new ArrayList<>(currentList));
                             currentList.clear();
                         }
@@ -255,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
                     continue;
                 }
 
-                // 棰戦亾琛? name,url
+                // 妫版垿浜剧悰? name,url
                 int commaIdx = line.indexOf(',');
                 if (commaIdx <= 0) continue;
                 String name = line.substring(0, commaIdx).trim();
@@ -263,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!url.startsWith("http")) continue;
                 if (name.isEmpty()) continue;
 
-                // 鍘婚噸锛氬悓鍒嗙被涓嬪悓鍚嶉閬撳悎骞禪RL
+                // 閸樺鍣搁敍姘倱閸掑棛琚稉瀣倱閸氬秹顣堕柆鎾虫値楠炵ΚRL
                 ChannelItem existing = null;
                 for (ChannelItem c : currentList) {
                     if (c.name.equals(name)) {
@@ -282,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            // 淇濆瓨鏈€鍚庝竴涓垎绫?            if (!currentList.isEmpty()) {
+            // 娣囨繂鐡ㄩ張鈧崥搴濈娑擃亜鍨庣猾?            if (!currentList.isEmpty()) {
                 result.put(currentCat, new ArrayList<>(currentList));
             }
 
@@ -296,21 +294,21 @@ public class MainActivity extends AppCompatActivity {
 
                 if (categoryNames.isEmpty()) {
                     tvNoSource.setVisibility(View.VISIBLE);
-                    tvNoSource.setText("鏆傛棤棰戦亾\n涓嬫媺鍒锋柊");
+                    tvNoSource.setText("閺嗗倹妫ゆ０鎴︿壕\n娑撳濯洪崚閿嬫煀");
                     categoryAdapter.update(new ArrayList<>());
                     channelAdapter.update(new ArrayList<>());
                     sourceAdapter.update(new ArrayList<>());
-                    tvCategoryTitle.setText("鍒嗙被");
-                    tvSourceTitle.setText("璇烽€夋嫨棰戦亾");
+                    tvCategoryTitle.setText("閸掑棛琚?);
+                    tvSourceTitle.setText("鐠囩兘鈧瀚ㄦ０鎴︿壕");
                 } else {
                     tvNoSource.setVisibility(View.GONE);
                     categoryAdapter.update(new ArrayList<>(categoryNames));
                     channelAdapter.update(new ArrayList<>());
                     sourceAdapter.update(new ArrayList<>());
                     tvCategoryTitle.setText(categoryNames.get(0));
-                    tvSourceTitle.setText("璇烽€夋嫨棰戦亾");
+                    tvSourceTitle.setText("鐠囩兘鈧瀚ㄦ０鎴︿壕");
 
-                    // 鑷姩鍔犺浇绗竴涓垎绫?                    selectedCatIndex = 0;
+                    // 閼奉亜濮╅崝鐘烘祰缁楊兛绔存稉顏勫瀻缁?                    selectedCatIndex = 0;
                     categoryAdapter.setSelected(0);
                     String firstCat = categoryNames.get(0);
                     loadChannelsForCategory(firstCat);
@@ -319,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // ==================== 缃戠粶鍔犺浇 ====================
+    // ==================== 缂冩垹绮堕崝鐘烘祰 ====================
     private void loadSource(String key) {
         Map<String, String> sources = new HashMap<>();
         sources.put("vip", SOURCE_VIP);
@@ -331,15 +329,15 @@ public class MainActivity extends AppCompatActivity {
 
         loading.setVisibility(View.VISIBLE);
         tvNoSource.setVisibility(View.GONE);
-        tvNoSource.setText("鍔犺浇涓?..");
+        tvNoSource.setText("閸旂姾娴囨稉?..");
 
         selectedCatIndex = -1;
         selectedChIndex = -1;
         categoryAdapter.update(new ArrayList<>());
         channelAdapter.update(new ArrayList<>());
         sourceAdapter.update(new ArrayList<>());
-        tvCategoryTitle.setText("鍒嗙被");
-        tvSourceTitle.setText("璇烽€夋嫨棰戦亾");
+        tvCategoryTitle.setText("閸掑棛琚?);
+        tvSourceTitle.setText("鐠囩兘鈧瀚ㄦ０鎴︿壕");
 
         Request request = new Request.Builder()
             .url(url)
@@ -352,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
                 mainHandler.post(() -> {
                     loading.setVisibility(View.GONE);
                     tvNoSource.setVisibility(View.VISIBLE);
-                    tvNoSource.setText("鍔犺浇澶辫触: " + e.getMessage());
+                    tvNoSource.setText("閸旂姾娴囨径杈Е: " + e.getMessage());
                 });
             }
 
@@ -365,14 +363,14 @@ public class MainActivity extends AppCompatActivity {
                     mainHandler.post(() -> {
                         loading.setVisibility(View.GONE);
                         tvNoSource.setVisibility(View.VISIBLE);
-                        tvNoSource.setText("HTTP閿欒: " + response.code());
+                        tvNoSource.setText("HTTP闁挎瑨顕? " + response.code());
                     });
                 }
             }
         });
     }
 
-    // ==================== 鎸夐挳浜嬩欢 ====================
+    // ==================== 閹稿鎸虫禍瀣╂ ====================
     public void switchSource(View v) {
         String key = null;
         int id = v.getId();
@@ -427,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
                 updateSourceButtons();
                 loadSource("custom");
             } else {
-                Toast.makeText(this, "鏃犳晥鐨勪簩缁寸爜鍐呭", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "閺冪姵鏅ラ惃鍕癌缂佸鐖滈崘鍛啇", Toast.LENGTH_SHORT).show();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -441,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 scanQRCode(null);
             } else {
-                Toast.makeText(this, "闇€瑕佺浉鏈烘潈闄愭墠鑳芥壂鎻忎簩缁寸爜", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "闂団偓鐟曚胶娴夐張鐑樻綀闂勬劖澧犻懗鑺ュ閹诲繋绨╃紒瀵哥垳", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -467,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ==================== 鏁版嵁绫?====================
+    // ==================== 閺佺増宓佺猾?====================
     static class ChannelItem {
         String name;
         List<String> urls = new ArrayList<>();
