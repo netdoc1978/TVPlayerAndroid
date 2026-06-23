@@ -27,7 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.journeyapps.barcodescanner.CaptureActivity;
 
+import android.widget.Toast;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,13 +63,13 @@ public class MainActivity extends AppCompatActivity {
     private OkHttpClient httpClient;
     private android.os.Handler mainHandler;
 
-    // 三级数据
+    // 涓夌骇鏁版嵁
     private LinkedHashMap<String, List<ChannelItem>> categoryMap = new LinkedHashMap<>();
     private List<String> categoryNames = new ArrayList<>();
     private int selectedCatIndex = -1;
     private int selectedChIndex = -1;
 
-    // 当前播放信息
+    // 褰撳墠鎾斁淇℃伅
     private String playingName = "";
 
     private static final String SOURCE_VIP = "https://8879.kstore.space/zhibo.txt";
@@ -108,8 +110,7 @@ public class MainActivity extends AppCompatActivity {
         channelList = findViewById(R.id.channelList);
         sourceList = findViewById(R.id.sourceList);
 
-        // 一级目录
-        categoryAdapter = new CategoryAdapter(new ArrayList<>(), position -> {
+        // 涓€绾х洰褰?        categoryAdapter = new CategoryAdapter(new ArrayList<>(), position -> {
             selectedCatIndex = position;
             selectedChIndex = -1;
             categoryAdapter.setSelected(position);
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         categoryList.setLayoutManager(new LinearLayoutManager(this));
         categoryList.setAdapter(categoryAdapter);
 
-        // 二级目录
+        // 浜岀骇鐩綍
         channelAdapter = new ChannelAdapter(new ArrayList<>(), position -> {
             selectedChIndex = position;
             channelAdapter.setSelected(position);
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         channelList.setLayoutManager(new LinearLayoutManager(this));
         channelList.setAdapter(channelAdapter);
 
-        // 三级目录（横向）
+        // 涓夌骇鐩綍锛堟í鍚戯級
         sourceAdapter = new SourceAdapter(new ArrayList<>(), position -> {
             SourceItem src = sourceAdapter.getItem(position);
             if (src != null) playUrl(src.url, src.label);
@@ -163,78 +164,75 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
                 runOnUiThread(() -> {
-                    Toast.makeText(MainActivity.this, "播放错误", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "鎾斁閿欒", Toast.LENGTH_SHORT).show();
                     loading.setVisibility(View.GONE);
                 });
             }
         });
     }
 
-    // ==================== 加载频道列表 ====================
+    // ==================== 鍔犺浇棰戦亾鍒楄〃 ====================
     private void loadChannelsForCategory(String catName) {
         List<ChannelItem> channels = categoryMap.get(catName);
         if (channels == null || channels.isEmpty()) {
             channelAdapter.update(new ArrayList<>());
             sourceAdapter.update(new ArrayList<>());
-            tvSourceTitle.setText("该分类暂无频道");
+            tvSourceTitle.setText("璇ュ垎绫绘殏鏃犻閬?);
             return;
         }
         channelAdapter.update(channels);
         sourceAdapter.update(new ArrayList<>());
-        tvSourceTitle.setText("请选择频道");
+        tvSourceTitle.setText("璇烽€夋嫨棰戦亾");
 
-        // 默认选中第一个频道
-        selectedChIndex = 0;
+        // 榛樿閫変腑绗竴涓閬?        selectedChIndex = 0;
         channelAdapter.setSelected(0);
         loadSourcesForChannel(channels.get(0));
     }
 
-    // ==================== 加载源列表并自动播放 ====================
+    // ==================== 鍔犺浇婧愬垪琛ㄥ苟鑷姩鎾斁 ====================
     private void loadSourcesForChannel(ChannelItem ch) {
         if (ch.urls.size() == 1) {
             playUrl(ch.urls.get(0), ch.name);
             List<SourceItem> sources = new ArrayList<>();
-            sources.add(new SourceItem(ch.name + " (唯一)", ch.urls.get(0)));
+            sources.add(new SourceItem(ch.name + " (鍞竴)", ch.urls.get(0)));
             sourceAdapter.update(sources);
-            tvSourceTitle.setText(ch.name + " (1个源)");
+            tvSourceTitle.setText(ch.name + " (1涓簮)");
         } else {
             List<SourceItem> sources = new ArrayList<>();
             for (int i = 0; i < ch.urls.size(); i++) {
-                String label = "源" + (i + 1) + " " + ch.name;
+                String label = "婧? + (i + 1) + " " + ch.name;
                 sources.add(new SourceItem(label, ch.urls.get(i)));
             }
             sourceAdapter.update(sources);
-            tvSourceTitle.setText(ch.name + " (" + ch.urls.size() + "个源，选1播放)");
-            // 自动播放第一个
-            playUrl(ch.urls.get(0), "源1 " + ch.name);
+            tvSourceTitle.setText(ch.name + " (" + ch.urls.size() + "涓簮锛岄€?鎾斁)");
+            // 鑷姩鎾斁绗竴涓?            playUrl(ch.urls.get(0), "婧? " + ch.name);
         }
     }
 
-    // ==================== 播放 ====================
+    // ==================== 鎾斁 ====================
     private void playUrl(String url, String name) {
         if (player == null) return;
         playingName = name;
         tvNoSource.setVisibility(View.GONE);
         loading.setVisibility(View.VISIBLE);
-        tvSourceTitle.setText("▶ " + name);
+        tvSourceTitle.setText("鈻?" + name);
         MediaItem mediaItem = MediaItem.fromUri(url);
         player.setMediaItem(mediaItem);
         player.prepare();
         player.play();
     }
 
-    // ==================== 解析直播源 ====================
-    // 格式: 频道名,#genre#  (表示分类名)
-    //       CCTV1,http://xxx.m3u8  (频道行)
-    // #genre#行本身是分类标记，该行前面的文字是分类名
+    // ==================== 瑙ｆ瀽鐩存挱婧?====================
+    // 鏍煎紡: 棰戦亾鍚?#genre#  (琛ㄧず鍒嗙被鍚?
+    //       CCTV1,http://xxx.m3u8  (棰戦亾琛?
+    // #genre#琛屾湰韬槸鍒嗙被鏍囪锛岃琛屽墠闈㈢殑鏂囧瓧鏄垎绫诲悕
     private void parseChannels(String text) {
         new Thread(() -> {
             LinkedHashMap<String, List<ChannelItem>> result = new LinkedHashMap<>();
-            String currentCat = "未分类";
+            String currentCat = "鏈垎绫?;
             List<ChannelItem> currentList = new ArrayList<>();
 
-            // 支持多种分隔符
-            String[] separators = {"\r\n", "\r", "\n"};
+            // 鏀寔澶氱鍒嗛殧绗?            String[] separators = {"\r\n", "\r", "\n"};
             String[] lines = text.split(separators[0]);
             for (int k = 1; k < separators.length && lines.length <= 1; k++) {
                 lines = text.split(separators[k]);
@@ -243,16 +241,12 @@ public class MainActivity extends AppCompatActivity {
             for (String raw : lines) {
                 String line = raw.trim();
                 if (line.isEmpty()) continue;
-                if (line.startsWith("//")) continue; // 注释行跳过
-
-                // #genre# 行 = 分类标记行
-                // 格式: "央视频道,#genre#" 或 "央视频道 , #genre#" 或只有 "#genre#"
+                if (line.startsWith("//")) continue; // 娉ㄩ噴琛岃烦杩?
+                // #genre# 琛?= 鍒嗙被鏍囪琛?                // 鏍煎紡: "澶棰戦亾,#genre#" 鎴?"澶棰戦亾 , #genre#" 鎴栧彧鏈?"#genre#"
                 if (line.contains("#genre#")) {
-                    // 提取分类名（去掉 #genre# 部分）
-                    String genrePart = line.substring(0, line.indexOf("#genre#")).trim();
+                    // 鎻愬彇鍒嗙被鍚嶏紙鍘绘帀 #genre# 閮ㄥ垎锛?                    String genrePart = line.substring(0, line.indexOf("#genre#")).trim();
                     if (!genrePart.isEmpty()) {
-                        // 保存上一个分类
-                        if (!currentList.isEmpty()) {
+                        // 淇濆瓨涓婁竴涓垎绫?                        if (!currentList.isEmpty()) {
                             result.put(currentCat, new ArrayList<>(currentList));
                             currentList.clear();
                         }
@@ -261,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                     continue;
                 }
 
-                // 频道行: name,url
+                // 棰戦亾琛? name,url
                 int commaIdx = line.indexOf(',');
                 if (commaIdx <= 0) continue;
                 String name = line.substring(0, commaIdx).trim();
@@ -269,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!url.startsWith("http")) continue;
                 if (name.isEmpty()) continue;
 
-                // 去重：同分类下同名频道合并URL
+                // 鍘婚噸锛氬悓鍒嗙被涓嬪悓鍚嶉閬撳悎骞禪RL
                 ChannelItem existing = null;
                 for (ChannelItem c : currentList) {
                     if (c.name.equals(name)) {
@@ -288,8 +282,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            // 保存最后一个分类
-            if (!currentList.isEmpty()) {
+            // 淇濆瓨鏈€鍚庝竴涓垎绫?            if (!currentList.isEmpty()) {
                 result.put(currentCat, new ArrayList<>(currentList));
             }
 
@@ -303,22 +296,21 @@ public class MainActivity extends AppCompatActivity {
 
                 if (categoryNames.isEmpty()) {
                     tvNoSource.setVisibility(View.VISIBLE);
-                    tvNoSource.setText("暂无频道\n下拉刷新");
+                    tvNoSource.setText("鏆傛棤棰戦亾\n涓嬫媺鍒锋柊");
                     categoryAdapter.update(new ArrayList<>());
                     channelAdapter.update(new ArrayList<>());
                     sourceAdapter.update(new ArrayList<>());
-                    tvCategoryTitle.setText("分类");
-                    tvSourceTitle.setText("请选择频道");
+                    tvCategoryTitle.setText("鍒嗙被");
+                    tvSourceTitle.setText("璇烽€夋嫨棰戦亾");
                 } else {
                     tvNoSource.setVisibility(View.GONE);
                     categoryAdapter.update(new ArrayList<>(categoryNames));
                     channelAdapter.update(new ArrayList<>());
                     sourceAdapter.update(new ArrayList<>());
                     tvCategoryTitle.setText(categoryNames.get(0));
-                    tvSourceTitle.setText("请选择频道");
+                    tvSourceTitle.setText("璇烽€夋嫨棰戦亾");
 
-                    // 自动加载第一个分类
-                    selectedCatIndex = 0;
+                    // 鑷姩鍔犺浇绗竴涓垎绫?                    selectedCatIndex = 0;
                     categoryAdapter.setSelected(0);
                     String firstCat = categoryNames.get(0);
                     loadChannelsForCategory(firstCat);
@@ -327,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // ==================== 网络加载 ====================
+    // ==================== 缃戠粶鍔犺浇 ====================
     private void loadSource(String key) {
         Map<String, String> sources = new HashMap<>();
         sources.put("vip", SOURCE_VIP);
@@ -339,15 +331,15 @@ public class MainActivity extends AppCompatActivity {
 
         loading.setVisibility(View.VISIBLE);
         tvNoSource.setVisibility(View.GONE);
-        tvNoSource.setText("加载中...");
+        tvNoSource.setText("鍔犺浇涓?..");
 
         selectedCatIndex = -1;
         selectedChIndex = -1;
         categoryAdapter.update(new ArrayList<>());
         channelAdapter.update(new ArrayList<>());
         sourceAdapter.update(new ArrayList<>());
-        tvCategoryTitle.setText("分类");
-        tvSourceTitle.setText("请选择频道");
+        tvCategoryTitle.setText("鍒嗙被");
+        tvSourceTitle.setText("璇烽€夋嫨棰戦亾");
 
         Request request = new Request.Builder()
             .url(url)
@@ -360,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
                 mainHandler.post(() -> {
                     loading.setVisibility(View.GONE);
                     tvNoSource.setVisibility(View.VISIBLE);
-                    tvNoSource.setText("加载失败: " + e.getMessage());
+                    tvNoSource.setText("鍔犺浇澶辫触: " + e.getMessage());
                 });
             }
 
@@ -373,14 +365,14 @@ public class MainActivity extends AppCompatActivity {
                     mainHandler.post(() -> {
                         loading.setVisibility(View.GONE);
                         tvNoSource.setVisibility(View.VISIBLE);
-                        tvNoSource.setText("HTTP错误: " + response.code());
+                        tvNoSource.setText("HTTP閿欒: " + response.code());
                     });
                 }
             }
         });
     }
 
-    // ==================== 按钮事件 ====================
+    // ==================== 鎸夐挳浜嬩欢 ====================
     public void switchSource(View v) {
         String key = null;
         int id = v.getId();
@@ -435,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
                 updateSourceButtons();
                 loadSource("custom");
             } else {
-                Toast.makeText(this, "无效的二维码内容", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "鏃犳晥鐨勪簩缁寸爜鍐呭", Toast.LENGTH_SHORT).show();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -449,7 +441,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 scanQRCode(null);
             } else {
-                Toast.makeText(this, "需要相机权限才能扫描二维码", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "闇€瑕佺浉鏈烘潈闄愭墠鑳芥壂鎻忎簩缁寸爜", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -475,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ==================== 数据类 ====================
+    // ==================== 鏁版嵁绫?====================
     static class ChannelItem {
         String name;
         List<String> urls = new ArrayList<>();
