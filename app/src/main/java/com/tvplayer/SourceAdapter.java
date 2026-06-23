@@ -10,45 +10,39 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.VH> {
+public class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.VH> {
 
-    private List<MainActivity.ChannelItem> channels;
+    private List<MainActivity.SourceItem> sources;
     private final java.util.function.Consumer<Integer> onClick;
-    private int selected = -1;
 
-    ChannelAdapter(List<MainActivity.ChannelItem> channels,
-                   java.util.function.Consumer<Integer> onClick) {
-        this.channels = channels;
+    SourceAdapter(List<MainActivity.SourceItem> sources,
+                  java.util.function.Consumer<Integer> onClick) {
+        this.sources = sources;
         this.onClick = onClick;
     }
 
-    void update(List<MainActivity.ChannelItem> list) {
-        this.channels = list;
-        this.selected = -1;
+    void update(List<MainActivity.SourceItem> list) {
+        this.sources = list;
         notifyDataSetChanged();
     }
 
-    void setSelected(int pos) {
-        int old = selected;
-        selected = pos;
-        if (old >= 0) notifyItemChanged(old);
-        if (pos >= 0) notifyItemChanged(pos);
+    MainActivity.SourceItem getItem(int pos) {
+        if (pos >= 0 && pos < sources.size()) return sources.get(pos);
+        return null;
     }
 
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.item_channel, parent, false);
+            .inflate(R.layout.item_source, parent, false);
         return new VH(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        MainActivity.ChannelItem ch = channels.get(position);
-        String text = ch.urls.size() > 1 ? ch.name + " (" + ch.urls.size() + "源)" : ch.name;
-        holder.btn.setText(text);
-        holder.btn.setSelected(position == selected);
+        MainActivity.SourceItem src = sources.get(position);
+        holder.btn.setText(src.label);
         holder.btn.setOnClickListener(v -> {
             int p = holder.getAdapterPosition();
             if (p != RecyclerView.NO_POSITION && onClick != null) {
@@ -59,14 +53,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.VH> {
 
     @Override
     public int getItemCount() {
-        return channels.size();
+        return sources.size();
     }
 
     static class VH extends RecyclerView.ViewHolder {
         Button btn;
         VH(@NonNull View itemView) {
             super(itemView);
-            btn = itemView.findViewById(R.id.btnChannel);
+            btn = itemView.findViewById(R.id.btnSource);
         }
     }
 }

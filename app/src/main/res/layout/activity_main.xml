@@ -6,123 +6,210 @@
     android:orientation="horizontal"
     android:background="#1a1a2e">
 
-    <!-- 频道列表（左侧） -->
+    <!-- ==================== 左侧：一级目录（分类）===================== -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:id="@+id/panelCategory"
+        android:layout_width="160dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#0f1626">
 
-        <!-- 源切换按钮 -->
+        <!-- 源切换 + 标题 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:padding="6dp"
             android:background="#16213e">
 
-            <Button
-                android:id="@+id/btnSourceVip"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:text="VIP"
-                android:textSize="11sp"
-                android:layout_marginRight="2dp"
-                android:onClick="switchSource" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="直播源"
+                android:textColor="#e94560"
+                android:textSize="13sp"
+                android:gravity="center"
+                android:paddingBottom="4dp" />
 
-            <Button
-                android:id="@+id/btnSourceBaohes"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:text="宝盒"
-                android:textSize="11sp"
-                android:layout_marginRight="2dp"
-                android:onClick="switchSource" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnSourceAi"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:text="AI"
-                android:textSize="11sp"
-                android:layout_marginRight="2dp"
-                android:onClick="switchSource" />
+                <Button
+                    android:id="@+id/btnSourceVip"
+                    android:layout_width="0dp"
+                    android:layout_height="30dp"
+                    android:layout_weight="1"
+                    android:text="VIP"
+                    android:textSize="10sp"
+                    android:layout_marginRight="2dp"
+                    android:onClick="switchSource" />
 
-            <Button
-                android:id="@+id/btnScanQr"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:text="扫码"
-                android:textSize="11sp"
-                android:onClick="scanQRCode" />
+                <Button
+                    android:id="@+id/btnSourceBaohes"
+                    android:layout_width="0dp"
+                    android:layout_height="30dp"
+                    android:layout_weight="1"
+                    android:text="宝盒"
+                    android:textSize="10sp"
+                    android:layout_marginRight="2dp"
+                    android:onClick="switchSource" />
+
+                <Button
+                    android:id="@+id/btnSourceAi"
+                    android:layout_width="0dp"
+                    android:layout_height="30dp"
+                    android:layout_weight="1"
+                    android:text="AI"
+                    android:textSize="10sp"
+                    android:layout_marginRight="2dp"
+                    android:onClick="switchSource" />
+
+                <Button
+                    android:id="@+id/btnScanQr"
+                    android:layout_width="0dp"
+                    android:layout_height="30dp"
+                    android:layout_weight="1"
+                    android:text="扫码"
+                    android:textSize="10sp"
+                    android:onClick="scanQRCode" />
+            </LinearLayout>
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/loading"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-
+        <!-- 一级目录标题 -->
         <TextView
-            android:id="@+id/noSourceView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="16dp"
-            android:text="暂无频道\n下拉刷新"
-            android:textColor="#888"
-            android:textSize="14sp"
-            android:visibility="gone" />
+            android:text="▼ 分类"
+            android:textColor="#aaa"
+            android:textSize="11sp"
+            android:padding="6dp"
+            android:background="#16213e" />
+
+        <!-- 分类列表 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/categoryList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="4dp"
+            android:clipToPadding="false" />
+
+    </LinearLayout>
+
+    <!-- ==================== 中间：二级目录（频道）===================== -->
+    <LinearLayout
+        android:id="@+id/panelChannel"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="#16213e">
+
+        <!-- 二级目录标题 -->
+        <TextView
+            android:id="@+id/tvCategoryTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="▼ 选择分类"
+            android:textColor="#e94560"
+            android:textSize="12sp"
+            android:padding="8dp"
+            android:background="#0f3460"
+            android:singleLine="true"
+            android:ellipsize="end" />
 
         <!-- 频道列表 -->
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/swipeRefresh"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/channelList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="4dp"
+            android:clipToPadding="false" />
+
+    </LinearLayout>
+
+    <!-- ==================== 右侧：播放器 + 三级目录（源）===================== -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:orientation="vertical"
+        android:background="#000">
+
+        <!-- 播放器 -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/channelList"
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/playerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="4dp"
-                android:clipToPadding="false" />
+                app:show_buffering="when_playing"
+                app:use_controller="false" />
 
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            <ProgressBar
+                android:id="@+id/loading"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvNoSource"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="暂无频道"
+                android:textColor="#888"
+                android:textSize="16sp" />
+
+        </FrameLayout>
+
+        <!-- 三级目录标题 + 刷新 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#0f1626"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvSourceTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="▼ 选择频道查看源"
+                android:textColor="#e94560"
+                android:textSize="12sp"
+                android:padding="6dp"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+            <Button
+                android:id="@+id/btnRefresh"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:text="刷新"
+                android:textSize="11sp"
+                android:onClick="refreshSource" />
+        </LinearLayout>
+
+        <!-- 源列表（横向滚动） -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/sourceList"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:background="#0f1626"
+            android:padding="4dp"
+            android:clipToPadding="false" />
 
     </LinearLayout>
-
-    <!-- 播放器（右侧） -->
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1.8"
-        android:background="#000">
-
-        <androidx.media3.ui.PlayerView
-            android:id="@+id/playerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:show_buffering="when_playing"
-            app:use_controller="true" />
-
-        <TextView
-            android:id="@+id/nowPlaying"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="16dp"
-            android:background="#80000000"
-            android:padding="8dp"
-            android:text="未选择频道"
-            android:textColor="#fff"
-            android:textSize="14sp" />
-
-    </FrameLayout>
 
 </LinearLayout>

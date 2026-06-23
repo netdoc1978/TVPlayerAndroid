@@ -10,20 +10,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.VH> {
+public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
 
-    private List<MainActivity.ChannelItem> channels;
+    private List<String> categories;
     private final java.util.function.Consumer<Integer> onClick;
     private int selected = -1;
 
-    ChannelAdapter(List<MainActivity.ChannelItem> channels,
-                   java.util.function.Consumer<Integer> onClick) {
-        this.channels = channels;
+    CategoryAdapter(List<String> categories, java.util.function.Consumer<Integer> onClick) {
+        this.categories = categories;
         this.onClick = onClick;
     }
 
-    void update(List<MainActivity.ChannelItem> list) {
-        this.channels = list;
+    void update(List<String> list) {
+        this.categories = list;
         this.selected = -1;
         notifyDataSetChanged();
     }
@@ -39,15 +38,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.VH> {
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.item_channel, parent, false);
+            .inflate(R.layout.item_category, parent, false);
         return new VH(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        MainActivity.ChannelItem ch = channels.get(position);
-        String text = ch.urls.size() > 1 ? ch.name + " (" + ch.urls.size() + "源)" : ch.name;
-        holder.btn.setText(text);
+        String cat = categories.get(position);
+        holder.btn.setText(cat);
         holder.btn.setSelected(position == selected);
         holder.btn.setOnClickListener(v -> {
             int p = holder.getAdapterPosition();
@@ -59,14 +57,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.VH> {
 
     @Override
     public int getItemCount() {
-        return channels.size();
+        return categories.size();
     }
 
     static class VH extends RecyclerView.ViewHolder {
         Button btn;
         VH(@NonNull View itemView) {
             super(itemView);
-            btn = itemView.findViewById(R.id.btnChannel);
+            btn = itemView.findViewById(R.id.btnCategory);
         }
     }
 }
