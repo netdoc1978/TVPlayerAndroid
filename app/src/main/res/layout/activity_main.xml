@@ -1,204 +1,191 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:background="#1a1a2e">
+    android:background="#101015"
+    android:clickable="true"
+    android:focusable="true">
 
-    <!-- Left: Category Panel -->
-    <LinearLayout
-        android:id="@+id/panelCategory"
-        android:layout_width="180dp"
+    <!-- Player -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="#B34D6B9B">
+        app:show_buffering="when_playing"
+        app:use_controller="false" />
 
-        <!-- Source Switch Area -->
+    <!-- Loading Indicator -->
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <!-- No Source Text -->
+    <TextView
+        android:id="@+id/tvNoSource"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Loading..."
+        android:textColor="#888888"
+        android:textSize="18sp" />
+
+    <!-- Menu Container - Hidden by default -->
+    <LinearLayout
+        android:id="@+id/menuContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:background="#80000000">
+
+        <!-- Left: Source Panel -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:id="@+id/panelSource"
+            android:layout_width="160dp"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="6dp"
-            android:background="#B03D5A8A">
+            android:background="#B04D6B9B"
+            android:layout_margin="20dp">
 
+            <!-- Source Title -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="直播源"
                 android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                android:gravity="center"
-                android:paddingBottom="4dp" />
+                android:textSize="13sp"
+                android:padding="10dp"
+                android:background="#B03D5A8A"
+                android:gravity="center" />
 
-            <LinearLayout
+            <!-- Source Buttons -->
+            <Button
+                android:id="@+id/btnSourceVip"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="40dp"
+                android:text="VIP"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:layout_margin="4dp"
+                android:background="@drawable/btn_selector"
+                android:onClick="switchSource" />
 
-                <Button
-                    android:id="@+id/btnSourceVip"
-                    android:layout_width="0dp"
-                    android:layout_height="28dp"
-                    android:layout_weight="1"
-                    android:text="VIP"
-                    android:textSize="10sp"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginRight="2dp"
-                    android:background="#FF6A8CBF"
-                    android:onClick="switchSource" />
+            <Button
+                android:id="@+id/btnSourceBaohes"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="宝盒直播"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:layout_margin="4dp"
+                android:background="@drawable/btn_selector"
+                android:onClick="switchSource" />
 
-                <Button
-                    android:id="@+id/btnSourceBaohes"
-                    android:layout_width="0dp"
-                    android:layout_height="28dp"
-                    android:layout_weight="1"
-                    android:text="宝盒"
-                    android:textSize="10sp"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginRight="2dp"
-                    android:background="#FF6A8CBF"
-                    android:onClick="switchSource" />
+            <Button
+                android:id="@+id/btnSourceAi"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="AI更新"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:layout_margin="4dp"
+                android:background="@drawable/btn_selector"
+                android:onClick="switchSource" />
 
-                <Button
-                    android:id="@+id/btnSourceAi"
-                    android:layout_width="0dp"
-                    android:layout_height="28dp"
-                    android:layout_weight="1"
-                    android:text="AI"
-                    android:textSize="10sp"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginRight="2dp"
-                    android:background="#FF6A8CBF"
-                    android:onClick="switchSource" />
+            <Button
+                android:id="@+id/btnScanQr"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="扫码添加"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:layout_margin="4dp"
+                android:background="@drawable/btn_selector"
+                android:onClick="scanQRCode" />
 
-                <Button
-                    android:id="@+id/btnScanQr"
-                    android:layout_width="0dp"
-                    android:layout_height="28dp"
-                    android:layout_weight="1"
-                    android:text="扫码"
-                    android:textSize="10sp"
-                    android:textColor="#FFFFFF"
-                    android:background="#FF6A8CBF"
-                    android:onClick="scanQRCode" />
-            </LinearLayout>
+            <Button
+                android:id="@+id/btnManualInput"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="手动输入"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:layout_margin="4dp"
+                android:background="@drawable/btn_selector"
+                android:onClick="showManualInput" />
+
         </LinearLayout>
 
-        <!-- Category Title -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="▼ 分类"
-            android:textColor="#FFFFFF"
-            android:textSize="11sp"
-            android:padding="6dp"
-            android:background="#B03D5A8A" />
+        <!-- Category Panel -->
+        <LinearLayout
+            android:id="@+id/panelCategory"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#B04D6B9B"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:visibility="gone">
 
-        <!-- Category List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/categoryList"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="4dp"
-            android:clipToPadding="false" />
+            <!-- Category Title -->
+            <TextView
+                android:id="@+id/tvCategoryTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="分类"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:padding="10dp"
+                android:background="#B03D5A8A" />
 
-    </LinearLayout>
-
-    <!-- Middle: Channel List -->
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:background="#B04D6B9B">
-
-        <!-- Channel Title -->
-        <TextView
-            android:id="@+id/tvCategoryTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="请选择分类"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:padding="8dp"
-            android:background="#B03D5A8A"
-            android:singleLine="true"
-            android:ellipsize="end" />
-
-        <!-- Channel List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/channelList"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="4dp"
-            android:clipToPadding="false" />
-
-    </LinearLayout>
-
-    <!-- Right: Player + Source List -->
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="2.2"
-        android:orientation="vertical"
-        android:background="#B04D6B9B">
-
-        <!-- Player -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <androidx.media3.ui.PlayerView
-                android:id="@+id/playerView"
+            <!-- Category List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categoryList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:show_buffering="when_playing"
-                app:use_controller="false" />
+                android:padding="4dp"
+                android:clipToPadding="false" />
 
-            <ProgressBar
-                android:id="@+id/loading"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:visibility="gone" />
+        </LinearLayout>
 
+        <!-- Channel Panel -->
+        <LinearLayout
+            android:id="@+id/panelChannel"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#B04D6B9B"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="20dp"
+            android:visibility="gone">
+
+            <!-- Channel Title -->
             <TextView
-                android:id="@+id/tvNoSource"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvChannelTitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="暂无频道"
-                android:textColor="#AAAAAA"
-                android:textSize="16sp" />
+                android:text="频道"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:padding="10dp"
+                android:background="#B03D5A8A" />
 
-        </FrameLayout>
+            <!-- Channel List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/channelList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="4dp"
+                android:clipToPadding="false" />
 
-        <!-- Source Title -->
-        <TextView
-            android:id="@+id/tvSourceTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="请选择频道"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:padding="8dp"
-            android:background="#B03D5A8A"
-            android:singleLine="true"
-            android:ellipsize="end" />
-
-        <!-- Source List (Horizontal) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/sourceList"
-            android:layout_width="match_parent"
-            android:layout_height="90dp"
-            android:background="#B03D5A8A"
-            android:padding="4dp"
-            android:clipToPadding="false" />
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

@@ -46,13 +46,19 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         MainActivity.ChannelItem ch = channels.get(position);
-        String text = ch.urls.size() > 1 ? ch.name + " (" + ch.urls.size() + " sources)" : ch.name;
+        String text = ch.name;
+        if (ch.urls.size() > 1) {
+            text = ch.name + " (" + ch.urls.size() + ")";
+        }
         holder.btn.setText(text);
         holder.btn.setSelected(position == selected);
-        holder.btn.setOnClickListener(v -> {
-            int p = holder.getAdapterPosition();
-            if (p != RecyclerView.NO_POSITION && onClick != null) {
-                onClick.accept(p);
+        holder.btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int p = holder.getAdapterPosition();
+                if (p != RecyclerView.NO_POSITION && onClick != null) {
+                    onClick.accept(p);
+                }
             }
         });
     }

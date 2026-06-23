@@ -1,11 +1,16 @@
 package com.tvplayer;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,11 +54,15 @@ public class MainActivity extends AppCompatActivity {
     private PlayerView playerView;
     private ProgressBar loading;
     private TextView tvNoSource;
-    private TextView tvSourceTitle;
+    private FrameLayout rootLayout;
+    private LinearLayout menuContainer;
+    private LinearLayout panelSource;
+    private LinearLayout panelCategory;
+    private LinearLayout panelChannel;
     private TextView tvCategoryTitle;
+    private TextView tvChannelTitle;
     private RecyclerView categoryList;
     private RecyclerView channelList;
-    private RecyclerView sourceList;
 
     private CategoryAdapter categoryAdapter;
     private ChannelAdapter channelAdapter;
@@ -72,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String SOURCE_AI = "https://hub.glowp.xyz/https://raw.githubusercontent.com/jn950/live/main/tv/pllive.txt";
     private static final int REQUEST_CAMERA = 100;
     private String currentSourceKey = "vip";
-    private String currentSourceUrl = SOURCE_VIP;
+
+    private int menuLevel = 0; // 0=hidden, 1=source, 2=category, 3=channel
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,11 +108,23 @@ public class MainActivity extends AppCompatActivity {
         playerView = findViewById(R.id.playerView);
         loading = findViewById(R.id.loading);
         tvNoSource = findViewById(R.id.tvNoSource);
-        tvSourceTitle = findViewById(R.id.tvSourceTitle);
+        rootLayout = findViewById(R.id.rootLayout);
+        menuContainer = findViewById(R.id.menuContainer);
+        panelSource = findViewById(R.id.panelSource);
+        panelCategory = findViewById(R.id.panelCategory);
+        panelChannel = findViewById(R.id.panelChannel);
         tvCategoryTitle = findViewById(R.id.tvCategoryTitle);
+        tvChannelTitle = findViewById(R.id.tvChannelTitle);
         categoryList = findViewById(R.id.categoryList);
         channelList = findViewById(R.id.channelList);
-        sourceList = findViewById(R.id.sourceList);
+
+        // Tap to show menu
+        rootLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleMenu();
+            }
+        });
 
         categoryAdapter = new CategoryAdapter(new ArrayList<String>(), new java.util.function.Consumer<Integer>() {
             @Override
@@ -113,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 String catName = categoryNames.get(position);
                 tvCategoryTitle.setText(catName);
                 loadChannelsForCategory(catName);
+                showLevel3();
             }
         });
         categoryList.setLayoutManager(new LinearLayoutManager(this));
@@ -127,25 +150,57 @@ public class MainActivity extends AppCompatActivity {
                 List<ChannelItem> channels = categoryMap.get(catName);
                 if (channels != null && position < channels.size()) {
                     ChannelItem ch = channels.get(position);
+                    tvChannelTitle.setText(ch.name);
                     loadSourcesForChannel(ch);
+                    hideMenu();
                 }
             }
         });
         channelList.setLayoutManager(new LinearLayoutManager(this));
         channelList.setAdapter(channelAdapter);
 
-        sourceAdapter = new SourceAdapter(new ArrayList<SourceItem>(), new java.util.function.Consumer<Integer>() {
-            @Override
-            public void accept(Integer position) {
-                SourceItem src = sourceAdapter.getItem(position);
-                if (src != null) playUrl(src.url, src.label);
-            }
-        });
-        sourceList.setLayoutManager(new GridLayoutManager(this, 3, GridLayoutManager.HORIZONTAL, false));
-        sourceList.setAdapter(sourceAdapter);
-
         initPlayer();
         updateSourceButtons();
+        hideMenu();
+    }
+
+    private void toggleMenu() {
+        if (menuContainer.getVisibility() == View.VISIBLE) {
+            hideMenu();
+        } else {
+            showMenu();
+        }
+    }
+
+    private void hideMenu() {
+        menuContainer.setVisibility(View.GONE);
+        menuLevel = 0;
+    }
+
+    private void showMenu() {
+        menuContainer.setVisibility(View.VISIBLE);
+        showLevel1();
+    }
+
+    private void showLevel1() {
+        menuLevel = 1;
+        panelSource.setVisibility(View.VISIBLE);
+        panelCategory.setVisibility(View.GONE);
+        panelChannel.setVisibility(View.GONE);
+    }
+
+    private void showLevel2() {
+        menuLevel = 2;
+        panelSource.setVisibility(View.VISIBLE);
+        panelCategory.setVisibility(View.VISIBLE);
+        panelChannel.setVisibility(View.GONE);
+    }
+
+    private void showLevel3() {
+        menuLevel = 3;
+        panelSource.setVisibility(View.VISIBLE);
+        panelCategory.setVisibility(View.VISIBLE);
+        panelChannel.setVisibility(View.VISIBLE);
     }
 
     private void initPlayer() {
@@ -185,34 +240,19 @@ public class MainActivity extends AppCompatActivity {
         List<ChannelItem> channels = categoryMap.get(catName);
         if (channels == null || channels.isEmpty()) {
             channelAdapter.update(new ArrayList<ChannelItem>());
-            sourceAdapter.update(new ArrayList<SourceItem>());
-            tvSourceTitle.setText("No channels");
+            tvChannelTitle.setText("No channels");
             return;
         }
         channelAdapter.update(channels);
-        sourceAdapter.update(new ArrayList<SourceItem>());
-        tvSourceTitle.setText("Select channel");
-        selectedChIndex = 0;
-        channelAdapter.setSelected(0);
-        loadSourcesForChannel(channels.get(0));
+        tvChannelTitle.setText("Select channel");
     }
 
     private void loadSourcesForChannel(ChannelItem ch) {
         if (ch.urls.size() == 1) {
             playUrl(ch.urls.get(0), ch.name);
-            List<SourceItem> sources = new ArrayList<SourceItem>();
-            sources.add(new SourceItem(ch.name + " (1 source)", ch.urls.get(0)));
-            sourceAdapter.update(sources);
-            tvSourceTitle.setText(ch.name + " (1 source)");
         } else {
-            List<SourceItem> sources = new ArrayList<SourceItem>();
-            for (int i = 0; i < ch.urls.size(); i++) {
-                String label = "Source" + (i + 1) + " - " + ch.name;
-                sources.add(new SourceItem(label, ch.urls.get(i)));
-            }
-            sourceAdapter.update(sources);
-            tvSourceTitle.setText(ch.name + " (" + ch.urls.size() + " sources, auto 1)");
-            playUrl(ch.urls.get(0), "Source1 - " + ch.name);
+            // Play first source, show source selection
+            playUrl(ch.urls.get(0), ch.name + " (Source 1)");
         }
     }
 
@@ -220,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
         if (player == null) return;
         tvNoSource.setVisibility(View.GONE);
         loading.setVisibility(View.VISIBLE);
-        tvSourceTitle.setText(">> " + name);
+        Toast.makeText(this, "Playing: " + name, Toast.LENGTH_SHORT).show();
         MediaItem mediaItem = MediaItem.fromUri(url);
         player.setMediaItem(mediaItem);
         player.prepare();
@@ -297,20 +337,15 @@ public class MainActivity extends AppCompatActivity {
 
                         if (categoryNames.isEmpty()) {
                             tvNoSource.setVisibility(View.VISIBLE);
-                            tvNoSource.setText("No channels");
+                            tvNoSource.setText("No channels loaded");
                             categoryAdapter.update(new ArrayList<String>());
                             channelAdapter.update(new ArrayList<ChannelItem>());
-                            sourceAdapter.update(new ArrayList<SourceItem>());
-                            tvCategoryTitle.setText("Category");
-                            tvSourceTitle.setText("Select channel");
                         } else {
                             tvNoSource.setVisibility(View.GONE);
                             categoryAdapter.update(new ArrayList<String>(categoryNames));
                             channelAdapter.update(new ArrayList<ChannelItem>());
-                            sourceAdapter.update(new ArrayList<SourceItem>());
-                            tvCategoryTitle.setText(categoryNames.get(0));
-                            tvSourceTitle.setText("Select channel");
 
+                            // Auto select first category
                             selectedCatIndex = 0;
                             categoryAdapter.setSelected(0);
                             loadChannelsForCategory(categoryNames.get(0));
@@ -330,7 +365,6 @@ public class MainActivity extends AppCompatActivity {
         String url = sources.get(key);
         if (url == null) return;
 
-        currentSourceUrl = url;
         loading.setVisibility(View.VISIBLE);
         tvNoSource.setVisibility(View.GONE);
         tvNoSource.setText("Loading...");
@@ -339,9 +373,6 @@ public class MainActivity extends AppCompatActivity {
         selectedChIndex = -1;
         categoryAdapter.update(new ArrayList<String>());
         channelAdapter.update(new ArrayList<ChannelItem>());
-        sourceAdapter.update(new ArrayList<SourceItem>());
-        tvCategoryTitle.setText("Category");
-        tvSourceTitle.setText("Select channel");
 
         Request request = new Request.Builder()
             .url(url)
@@ -391,6 +422,7 @@ public class MainActivity extends AppCompatActivity {
             currentSourceKey = key;
             updateSourceButtons();
             loadSource(key);
+            showLevel1();
         }
     }
 
@@ -403,8 +435,29 @@ public class MainActivity extends AppCompatActivity {
         btnAi.setAlpha("ai".equals(currentSourceKey) ? 1.0f : 0.5f);
     }
 
-    public void refreshSource(View v) {
-        loadSource(currentSourceKey);
+    public void showManualInput(View v) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Input Stream URL");
+        builder.setView(R.layout.dialog_manual_input);
+        builder.setPositiveButton("OK", new android.content.DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(android.content.DialogInterface dialog, int which) {
+                EditText etUrl = ((AlertDialog) dialog).findViewById(R.id.etSourceUrl);
+                if (etUrl != null) {
+                    String url = etUrl.getText().toString().trim();
+                    if (!url.isEmpty() && url.startsWith("http")) {
+                        currentSourceKey = "custom";
+                        updateSourceButtons();
+                        loadCustomSource(url);
+                        hideMenu();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Invalid URL", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 
     public void scanQRCode(View v) {
@@ -432,9 +485,9 @@ public class MainActivity extends AppCompatActivity {
             String url = result.getContents().trim();
             if (url.startsWith("http")) {
                 currentSourceKey = "custom";
-                currentSourceUrl = url;
                 updateSourceButtons();
                 loadCustomSource(url);
+                hideMenu();
             } else {
                 Toast.makeText(this, "Invalid QR", Toast.LENGTH_SHORT).show();
             }
@@ -451,9 +504,6 @@ public class MainActivity extends AppCompatActivity {
         selectedChIndex = -1;
         categoryAdapter.update(new ArrayList<String>());
         channelAdapter.update(new ArrayList<ChannelItem>());
-        sourceAdapter.update(new ArrayList<SourceItem>());
-        tvCategoryTitle.setText("Category");
-        tvSourceTitle.setText("Select channel");
 
         Request request = new Request.Builder()
             .url(url)
@@ -531,11 +581,5 @@ public class MainActivity extends AppCompatActivity {
         String name;
         List<String> urls = new ArrayList<String>();
         ChannelItem(String n) { name = n; }
-    }
-
-    static class SourceItem {
-        String label;
-        String url;
-        SourceItem(String l, String u) { label = l; url = u; }
     }
 }
