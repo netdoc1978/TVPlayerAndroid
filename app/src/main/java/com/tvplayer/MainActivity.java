@@ -3,13 +3,11 @@ package com.tvplayer;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -63,14 +61,14 @@ public class MainActivity extends AppCompatActivity {
     private OkHttpClient httpClient;
     private android.os.Handler mainHandler;
 
-    // ==================== 三级数据模型 ====================
-    // 一级: Map<分类名, 该分类的频道列表>
+    // 三级数据
     private LinkedHashMap<String, List<ChannelItem>> categoryMap = new LinkedHashMap<>();
-    // 一级列表（保持顺序）
     private List<String> categoryNames = new ArrayList<>();
-    // 当前选中
     private int selectedCatIndex = -1;
     private int selectedChIndex = -1;
+
+    // 当前播放信息
+    private String playingName = "";
 
     private static final String SOURCE_VIP = "https://8879.kstore.space/zhibo.txt";
     private static final String SOURCE_BAOHES = "http://ygbh.cc.cd/bhzb.php";
@@ -116,8 +114,7 @@ public class MainActivity extends AppCompatActivity {
             selectedChIndex = -1;
             categoryAdapter.setSelected(position);
             String catName = categoryNames.get(position);
-            tvCategoryTitle.setText("▼ " + catName);
-            // 加载该分类的频道
+            tvCategoryTitle.setText(catName);
             loadChannelsForCategory(catName);
         });
         categoryList.setLayoutManager(new LinearLayoutManager(this));
@@ -173,54 +170,50 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // ==================== 加载频道列表（一级 -> 二级）====================
+    // ==================== 加载频道列表 ====================
     private void loadChannelsForCategory(String catName) {
         List<ChannelItem> channels = categoryMap.get(catName);
-        if (channels == null) {
+        if (channels == null || channels.isEmpty()) {
             channelAdapter.update(new ArrayList<>());
             sourceAdapter.update(new ArrayList<>());
-            tvSourceTitle.setText("▼ 选择频道查看源");
+            tvSourceTitle.setText("该分类暂无频道");
             return;
         }
         channelAdapter.update(channels);
         sourceAdapter.update(new ArrayList<>());
-        tvSourceTitle.setText("▼ 选择频道查看源");
+        tvSourceTitle.setText("请选择频道");
 
-        // 默认选中第一个频道并显示其源
-        if (!channels.isEmpty()) {
-            selectedChIndex = 0;
-            channelAdapter.setSelected(0);
-            loadSourcesForChannel(channels.get(0));
-        }
+        // 默认选中第一个频道
+        selectedChIndex = 0;
+        channelAdapter.setSelected(0);
+        loadSourcesForChannel(channels.get(0));
     }
 
-    // ==================== 加载源列表（二级 -> 三级）====================
+    // ==================== 加载源列表并自动播放 ====================
     private void loadSourcesForChannel(ChannelItem ch) {
         if (ch.urls.size() == 1) {
-            // 只有一个源，直接播放
             playUrl(ch.urls.get(0), ch.name);
-            // 同时显示源列表
             List<SourceItem> sources = new ArrayList<>();
             sources.add(new SourceItem(ch.name + " (唯一)", ch.urls.get(0)));
             sourceAdapter.update(sources);
-            tvSourceTitle.setText("▼ " + ch.name + " 的源 (1个)");
+            tvSourceTitle.setText(ch.name + " (1个源)");
         } else {
-            // 多个源，显示列表让用户选择
             List<SourceItem> sources = new ArrayList<>();
             for (int i = 0; i < ch.urls.size(); i++) {
-                String label = ch.name + " 源" + (i + 1);
+                String label = "源" + (i + 1) + " " + ch.name;
                 sources.add(new SourceItem(label, ch.urls.get(i)));
             }
             sourceAdapter.update(sources);
-            tvSourceTitle.setText("▼ " + ch.name + " 的源 (" + ch.urls.size() + "个，选1播放)");
+            tvSourceTitle.setText(ch.name + " (" + ch.urls.size() + "个源，选1播放)");
             // 自动播放第一个
-            playUrl(ch.urls.get(0), ch.name + " 源1");
+            playUrl(ch.urls.get(0), "源1 " + ch.name);
         }
     }
 
     // ==================== 播放 ====================
     private void playUrl(String url, String name) {
         if (player == null) return;
+        playingName = name;
         tvNoSource.setVisibility(View.GONE);
         loading.setVisibility(View.VISIBLE);
         tvSourceTitle.setText("▶ " + name);
@@ -230,35 +223,40 @@ public class MainActivity extends AppCompatActivity {
         player.play();
     }
 
-    // ==================== 解析直播源文本 ====================
-    // 格式示例:
-    // #中央台#
-    // CCTV1,http://xxx/1.m3u8
-    // CCTV2,http://xxx/2.m3u8
-    // #卫视频#
-    // 湖南卫视,http://xxx/hn.m3u8
+    // ==================== 解析直播源 ====================
+    // 格式: 频道名,#genre#  (表示分类名)
+    //       CCTV1,http://xxx.m3u8  (频道行)
+    // #genre#行本身是分类标记，该行前面的文字是分类名
     private void parseChannels(String text) {
         new Thread(() -> {
             LinkedHashMap<String, List<ChannelItem>> result = new LinkedHashMap<>();
             String currentCat = "未分类";
             List<ChannelItem> currentList = new ArrayList<>();
 
-            String[] lines = text.split("\n");
+            // 支持多种分隔符
+            String[] separators = {"\r\n", "\r", "\n"};
+            String[] lines = text.split(separators[0]);
+            for (int k = 1; k < separators.length && lines.length <= 1; k++) {
+                lines = text.split(separators[k]);
+            }
+
             for (String raw : lines) {
                 String line = raw.trim();
                 if (line.isEmpty()) continue;
-                if (line.startsWith("//") || line.startsWith("#")) {
-                    // #genre# 是分隔符，不是分类名
-                    if (line.contains("#genre#")) continue;
-                    // 去掉首尾 # 作为分类名
-                    if (line.startsWith("#") && line.endsWith("#") && line.length() > 2) {
+                if (line.startsWith("//")) continue; // 注释行跳过
+
+                // #genre# 行 = 分类标记行
+                // 格式: "央视频道,#genre#" 或 "央视频道 , #genre#" 或只有 "#genre#"
+                if (line.contains("#genre#")) {
+                    // 提取分类名（去掉 #genre# 部分）
+                    String genrePart = line.substring(0, line.indexOf("#genre#")).trim();
+                    if (!genrePart.isEmpty()) {
                         // 保存上一个分类
                         if (!currentList.isEmpty()) {
                             result.put(currentCat, new ArrayList<>(currentList));
                             currentList.clear();
                         }
-                        currentCat = line.substring(1, line.length() - 1).trim();
-                        if (currentCat.isEmpty()) currentCat = "其他";
+                        currentCat = genrePart;
                     }
                     continue;
                 }
@@ -271,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!url.startsWith("http")) continue;
                 if (name.isEmpty()) continue;
 
-                // 去重：同分类下同名频道合并
+                // 去重：同分类下同名频道合并URL
                 ChannelItem existing = null;
                 for (ChannelItem c : currentList) {
                     if (c.name.equals(name)) {
@@ -280,7 +278,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 if (existing != null) {
-                    // 已有该频道，追加URL（避免重复）
                     if (!existing.urls.contains(url)) {
                         existing.urls.add(url);
                     }
@@ -296,11 +293,12 @@ public class MainActivity extends AppCompatActivity {
                 result.put(currentCat, new ArrayList<>(currentList));
             }
 
+            final LinkedHashMap<String, List<ChannelItem>> finalResult = result;
             mainHandler.post(() -> {
                 categoryMap.clear();
-                categoryMap.putAll(result);
+                categoryMap.putAll(finalResult);
                 categoryNames.clear();
-                categoryNames.addAll(result.keySet());
+                categoryNames.addAll(finalResult.keySet());
                 loading.setVisibility(View.GONE);
 
                 if (categoryNames.isEmpty()) {
@@ -309,21 +307,20 @@ public class MainActivity extends AppCompatActivity {
                     categoryAdapter.update(new ArrayList<>());
                     channelAdapter.update(new ArrayList<>());
                     sourceAdapter.update(new ArrayList<>());
-                    tvCategoryTitle.setText("▼ 分类");
-                    tvSourceTitle.setText("▼ 选择频道查看源");
+                    tvCategoryTitle.setText("分类");
+                    tvSourceTitle.setText("请选择频道");
                 } else {
                     tvNoSource.setVisibility(View.GONE);
                     categoryAdapter.update(new ArrayList<>(categoryNames));
                     channelAdapter.update(new ArrayList<>());
                     sourceAdapter.update(new ArrayList<>());
-                    tvCategoryTitle.setText("▼ 分类");
-                    tvSourceTitle.setText("▼ 选择频道查看源");
+                    tvCategoryTitle.setText(categoryNames.get(0));
+                    tvSourceTitle.setText("请选择频道");
 
-                    // ==================== 默认加载第一个分类、第一个频道、自动播放 ====================
+                    // 自动加载第一个分类
                     selectedCatIndex = 0;
                     categoryAdapter.setSelected(0);
                     String firstCat = categoryNames.get(0);
-                    tvCategoryTitle.setText("▼ " + firstCat);
                     loadChannelsForCategory(firstCat);
                 }
             });
@@ -332,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ==================== 网络加载 ====================
     private void loadSource(String key) {
-        java.util.Map<String, String> sources = new java.util.HashMap<>();
+        Map<String, String> sources = new HashMap<>();
         sources.put("vip", SOURCE_VIP);
         sources.put("baohes", SOURCE_BAOHES);
         sources.put("ai", SOURCE_AI);
@@ -344,14 +341,13 @@ public class MainActivity extends AppCompatActivity {
         tvNoSource.setVisibility(View.GONE);
         tvNoSource.setText("加载中...");
 
-        // 重置选择
         selectedCatIndex = -1;
         selectedChIndex = -1;
         categoryAdapter.update(new ArrayList<>());
         channelAdapter.update(new ArrayList<>());
         sourceAdapter.update(new ArrayList<>());
-        tvCategoryTitle.setText("▼ 分类");
-        tvSourceTitle.setText("▼ 选择频道查看源");
+        tvCategoryTitle.setText("分类");
+        tvSourceTitle.setText("请选择频道");
 
         Request request = new Request.Builder()
             .url(url)
@@ -458,7 +454,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ==================== 生命周期 ====================
     @Override
     protected void onResume() {
         super.onResume();
@@ -481,14 +476,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ==================== 数据类 ====================
-    // 二级数据：频道（去重后，同名合并多个URL）
     static class ChannelItem {
         String name;
         List<String> urls = new ArrayList<>();
         ChannelItem(String n) { name = n; }
     }
 
-    // 三级数据：具体源
     static class SourceItem {
         String label;
         String url;
