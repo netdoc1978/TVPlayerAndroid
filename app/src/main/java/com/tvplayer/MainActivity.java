@@ -1,4 +1,4 @@
-﻿package com.tvplayer;
+package com.tvplayer;
 
 import android.Manifest;
 import android.content.pm.PackageManager;

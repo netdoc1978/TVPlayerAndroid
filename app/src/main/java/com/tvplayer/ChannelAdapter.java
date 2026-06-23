@@ -1,4 +1,4 @@
-﻿package com.tvplayer;
+package com.tvplayer;
 
 import android.view.LayoutInflater;
 import android.view.View;
