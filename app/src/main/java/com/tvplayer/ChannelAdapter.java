@@ -1,4 +1,4 @@
-package com.tvplayer;
+﻿package com.tvplayer;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,7 +46,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         MainActivity.ChannelItem ch = channels.get(position);
-        String text = ch.urls.size() > 1 ? ch.name + " (" + ch.urls.size() + "源)" : ch.name;
+        String text = ch.urls.size() > 1 ? ch.name + " (" + ch.urls.size() + " sources)" : ch.name;
         holder.btn.setText(text);
         holder.btn.setSelected(position == selected);
         holder.btn.setOnClickListener(v -> {
